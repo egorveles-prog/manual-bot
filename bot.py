@@ -40,7 +40,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
     if not is_allowed(user_id):
-
         await update.message.reply_text(
             f"⛔ У вас немає доступу.\n\n"
             f"Ваш ID:\n{user_id}\n\n"
@@ -85,14 +84,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def allow_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if update.effective_user.id != ADMIN_ID:
-
         await update.message.reply_text(
             "⛔ Тільки адміністратор."
         )
         return
 
     try:
-
         new_user_id = int(context.args[0])
 
         users = load_users()
@@ -107,7 +104,6 @@ async def allow_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     except Exception:
-
         await update.message.reply_text(
             "Приклад:\n/allow 123456789"
         )
@@ -143,60 +139,4 @@ async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text)
 
 
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    query = update.callback_query
-
-    await query.answer()
-
-    if query.data == "faults":
-
-        await query.message.reply_text(
-            "⚠️ Типові несправності\n\n"
-            "• Не запускається\n"
-            "• Помилка датчика\n"
-            "• Помилка частотника\n"
-            "• Проблема філетування\n"
-            "• Заклинювання конвеєра"
-        )
-        return
-
-    manuals = load_manuals()
-
-    if query.data in manuals:
-
-        item = manuals[query.data]
-
-        await query.message.reply_text(
-            f"✅ {item['name']}\n\n"
-            f"🔗 {item['url']}"
-        )
-
-
-async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if not is_allowed(update.effective_user.id):
-
-        await update.message.reply_text(
-            "⛔ Доступ заборонений."
-        )
-        return
-
-    query = update.message.text.lower().strip()
-
-    manuals = load_manuals()
-
-    for item in manuals.values():
-
-        if query in item["name"].lower():
-
-            await update.message.reply_text(
-                f"✅ {item['name']}\n\n"
-                f"🔗 {item['url']}"
-            )
-            return
-
-        for keyword in item.get("keywords", []):
-
-            keyword = keyword.lower()
-
+async def button_handler(update: 
