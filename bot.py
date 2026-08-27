@@ -4,7 +4,7 @@ from telegram.ext import (
     CommandHandler,
     MessageHandler,
     ContextTypes,
-    filters,
+    filters
 )
 
 import json
@@ -14,11 +14,19 @@ TOKEN = os.getenv("BOT_TOKEN")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     await update.message.reply_text(
         "🤖 База мануалів\n\n"
-        "Введіть назву обладнання:\n"
-        "• mayekawa\n"
-        "• kfc\n\n"
+        "Введіть назву обладнання або операції.\n\n"
+        "Приклади:\n"
+        "mayekawa\n"
+        "майякава\n"
+        "дебонер\n"
+        "обвалка\n"
+        "сторк\n"
+        "марел\n"
+        "джейбіті\n"
+        "філе\n\n"
         "/list - список мануалів"
     )
 
@@ -45,10 +53,25 @@ async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     results = []
 
-    for key, value in manuals.items():
+    for item in manuals.values():
 
-        if query in key.lower() or query in value["name"].lower():
-            results.append(value)
+        name = item.get("name", "").lower()
+
+        if query in name:
+            results.append(item)
+            continue
+
+        for keyword in item.get("keywords", []):
+
+            keyword = keyword.lower()
+
+            if (
+                query == keyword
+                or query in keyword
+                or keyword in query
+            ):
+                results.append(item)
+                break
 
     if not results:
 
@@ -59,10 +82,12 @@ async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     for item in results:
 
-        await update.message.reply_text(
+        text = (
             f"✅ {item['name']}\n\n"
             f"🔗 {item['url']}"
         )
+
+        await update.message.reply_text(text)
 
 
 app = Application.builder().token(TOKEN).build()
@@ -81,5 +106,7 @@ app.add_handler(
         search_manual
     )
 )
+
+print("Bot started")
 
 app.run_polling()
