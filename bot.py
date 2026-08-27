@@ -1,3 +1,4 @@
+from pypdf import PdfReader
 from telegram import Update
 from telegram.ext import Application, MessageHandler, CommandHandler, ContextTypes, filters
 import os
