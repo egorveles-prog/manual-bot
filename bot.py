@@ -12,26 +12,121 @@ import os
 
 TOKEN = os.getenv("BOT_TOKEN")
 
+ADMIN_ID = 687844961
+
+
+def load_users():
+    with open("users.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_users(data):
+    with open("users.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def is_allowed(user_id):
+    users = load_users()
+    return user_id in users["users"]
+
+
+def is_admin(user_id):
+    users = load_users()
+    return user_id in users["admins"]
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
+    if not is_allowed(update.effective_user.id):
+        await update.message.reply_text(
+            "⛔ У вас немає доступу до бота."
+        )
+        return
+
     await update.message.reply_text(
         "🤖 База мануалів\n\n"
-        "Введіть назву обладнання або операції.\n\n"
-        "Приклади:\n"
-        "mayekawa\n"
-        "майякава\n"
-        "дебонер\n"
-        "обвалка\n"
-        "сторк\n"
-        "марел\n"
-        "джейбіті\n"
-        "філе\n\n"
-        "/list - список мануалів"
+        "/list - список мануалів\n"
+        "/users - список користувачів"
     )
 
 
+async def add_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not is_admin(update.effective_user.id):
+        await update.message.reply_text(
+            "⛔ Тільки адміністратор."
+        )
+        return
+
+    try:
+
+        new_user = int(context.args[0])
+
+        users = load_users()
+
+        if new_user not in users["users"]:
+            users["users"].append(new_user)
+
+        save_users(users)
+
+        await update.message.reply_text(
+            f"✅ Користувач {new_user} доданий."
+        )
+
+    except:
+        await update.message.reply_text(
+            "Використання:\n/adduser 123456789"
+        )
+
+
+async def remove_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not is_admin(update.effective_user.id):
+        await update.message.reply_text(
+            "⛔ Тільки адміністратор."
+        )
+        return
+
+    try:
+
+        user_id = int(context.args[0])
+
+        users = load_users()
+
+        if user_id in users["users"]:
+            users["users"].remove(user_id)
+
+        save_users(users)
+
+        await update.message.reply_text(
+            f"✅ Користувач {user_id} видалений."
+        )
+
+    except:
+        await update.message.reply_text(
+            "Використання:\n/removeuser 123456789"
+        )
+
+
+async def list_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not is_admin(update.effective_user.id):
+        return
+
+    users = load_users()
+
+    text = "👥 Користувачі:\n\n"
+
+    for user in users["users"]:
+        text += f"{user}\n"
+
+    await update.message.reply_text(text)
+
+
 async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not is_allowed(update.effective_user.id):
+        return
 
     with open("manuals.json", "r", encoding="utf-8") as f:
         manuals = json.load(f)
@@ -45,6 +140,13 @@ async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not is_allowed(update.effective_user.id):
+
+        await update.message.reply_text(
+            "⛔ Доступ заборонений."
+        )
+        return
 
     query = update.message.text.lower().strip()
 
@@ -68,45 +170,4 @@ async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if (
                 query == keyword
                 or query in keyword
-                or keyword in query
-            ):
-                results.append(item)
-                break
-
-    if not results:
-
-        await update.message.reply_text(
-            "❌ Нічого не знайдено."
-        )
-        return
-
-    for item in results:
-
-        text = (
-            f"✅ {item['name']}\n\n"
-            f"🔗 {item['url']}"
-        )
-
-        await update.message.reply_text(text)
-
-
-app = Application.builder().token(TOKEN).build()
-
-app.add_handler(
-    CommandHandler("start", start)
-)
-
-app.add_handler(
-    CommandHandler("list", list_manuals)
-)
-
-app.add_handler(
-    MessageHandler(
-        filters.TEXT & ~filters.COMMAND,
-        search_manual
-    )
-)
-
-print("Bot started")
-
-app.run_polling()
+                or keyword
