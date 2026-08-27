@@ -1,12 +1,8 @@
 from telegram import Update
-from telegram import InlineKeyboardButton
-from telegram import InlineKeyboardMarkup
-
 from telegram.ext import (
     Application,
     CommandHandler,
     MessageHandler,
-    CallbackQueryHandler,
     ContextTypes,
     filters
 )
@@ -15,6 +11,7 @@ import json
 import os
 
 TOKEN = os.getenv("BOT_TOKEN")
+
 ADMIN_ID = 687844961
 
 
@@ -26,11 +23,6 @@ def load_users():
 def save_users(data):
     with open("users.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def load_manuals():
-    with open("manuals.json", "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 def is_allowed(user_id):
@@ -51,24 +43,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    keyboard = [
-        [
-            InlineKeyboardButton(
-                "🔧 Виробники",
-                callback_data="manufacturers"
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                "📚 Всі мануали",
-                callback_data="all_manuals"
-            )
-        ]
-    ]
-
     await update.message.reply_text(
-        "🤖 База мануалів",
-        reply_markup=InlineKeyboardMarkup(keyboard)
+        "🤖 База мануалів\n\n"
+        "/list - список мануалів\n"
+        "/users - список користувачів\n"
+        "/allow ID - додати користувача"
     )
 
 
@@ -89,7 +68,8 @@ async def allow_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if new_user_id not in users["users"]:
             users["users"].append(new_user_id)
-            save_users(users)
+
+        save_users(users)
 
         await update.message.reply_text(
             f"✅ Користувач {new_user_id} доданий."
@@ -122,7 +102,8 @@ async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_allowed(update.effective_user.id):
         return
 
-    manuals = load_manuals()
+    with open("manuals.json", "r", encoding="utf-8") as f:
+        manuals = json.load(f)
 
     text = "📚 Список мануалів:\n\n"
 
@@ -132,38 +113,63 @@ async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text)
 
 
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    query = update.callback_query
+    if not is_allowed(update.effective_user.id):
 
-    await query.answer()
-
-    if query.data == "manufacturers":
-
-        keyboard = [
-            [
-                InlineKeyboardButton(
-                    "Mayekawa",
-                    callback_data="mayekawa"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    "KFC",
-                    callback_data="kfc"
-                )
-            ]
-        ]
-
-        await query.message.reply_text(
-            "🔧 Оберіть виробника:",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            "⛔ Доступ заборонений."
         )
-
         return
 
-    if query.data == "all_manuals":
+    query = update.message.text.lower().strip()
 
-        manuals = load_manuals()
+    with open("manuals.json", "r", encoding="utf-8") as f:
+        manuals = json.load(f)
 
-        text = "📚 Список мануал
+    for item in manuals.values():
+
+        if query in item["name"].lower():
+
+            await update.message.reply_text(
+                f"✅ {item['name']}\n\n🔗 {item['url']}"
+            )
+            return
+
+        for keyword in item.get("keywords", []):
+
+            keyword = keyword.lower()
+
+            if (
+                query == keyword
+                or query in keyword
+                or keyword in query
+            ):
+
+                await update.message.reply_text(
+                    f"✅ {item['name']}\n\n🔗 {item['url']}"
+                )
+                return
+
+    await update.message.reply_text(
+        "❌ Нічого не знайдено."
+    )
+
+
+app = Application.builder().token(TOKEN).build()
+
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("list", list_manuals))
+app.add_handler(CommandHandler("allow", allow_user))
+app.add_handler(CommandHandler("users", users_list))
+
+app.add_handler(
+    MessageHandler(
+        filters.TEXT & ~filters.COMMAND,
+        search_manual
+    )
+)
+
+print("Bot started")
+
+app.run_polling()
