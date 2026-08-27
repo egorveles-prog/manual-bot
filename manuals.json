@@ -1,10 +1,144 @@
 {
   "mayekawa": {
     "name": "Дебонер Mayekawa Spar Catallog.pdf",
-    "url": "https://drive.google.com/file/d/19Z4jdDj4MG0n9x6fOrERvCSi9GANuCW2/view?usp=drive_link"
+    "url": "https://drive.google.com/file/d/19Z4jdDj4MG0n9x6fOrERvCSi9GANuCW2/view?usp=drive_link",
+    "keywords": [
+      "mayekawa",
+      "майекава",
+      "майякава",
+      "майакава",
+      "мейкава",
+      "мейакава",
+      "дебонер",
+      "обвалка",
+      "філетування",
+      "філе",
+      "филе"
+    ]
   },
+
   "kfc": {
     "name": "KFC 9 Piece Spec.pdf",
-    "url": "https://drive.google.com/file/d/1qNkjQjTCoLhX-pNZz-N94tFbT0pJ_jGi/view?usp=drive_link"
+    "url": "https://drive.google.com/file/d/1qNkjQjTCoLhX-pNZz-N94tFbT0pJ_jGi/view?usp=drive_link",
+    "keywords": [
+      "kfc",
+      "кейефсі",
+      "кей еф сі",
+      "кфс",
+      "кейфсі"
+    ]
+  },
+
+  "baader": {
+    "name": "BAADER",
+    "url": "",
+    "keywords": [
+      "baader",
+      "баадер",
+      "бадер",
+      "беадер",
+      "філетування",
+      "філе"
+    ]
+  },
+
+  "fhf": {
+    "name": "FHF",
+    "url": "",
+    "keywords": [
+      "fhf",
+      "еф аш еф",
+      "фхф",
+      "еф х еф"
+    ]
+  },
+
+  "amf": {
+    "name": "AMF",
+    "url": "",
+    "keywords": [
+      "amf",
+      "амф",
+      "а ем еф"
+    ]
+  },
+
+  "foodmate": {
+    "name": "FoodMate",
+    "url": "",
+    "keywords": [
+      "foodmate",
+      "фудмейт",
+      "фудмате",
+      "фуд мейт"
+    ]
+  },
+
+  "stork": {
+    "name": "Stork",
+    "url": "",
+    "keywords": [
+      "stork",
+      "сторк",
+      "шторк"
+    ]
+  },
+
+  "marel": {
+    "name": "Marel",
+    "url": "",
+    "keywords": [
+      "marel",
+      "марел",
+      "марель",
+      "морел"
+    ]
+  },
+
+  "jbt": {
+    "name": "JBT",
+    "url": "",
+    "keywords": [
+      "jbt",
+      "джейбіті",
+      "джей би ти",
+      "джбт"
+    ]
+  },
+
+  "dimaq": {
+    "name": "Dimaq",
+    "url": "",
+    "keywords": [
+      "dimaq",
+      "дімак",
+      "димак"
+    ]
+  },
+
+  "operations": {
+    "name": "Технологічні операції",
+    "url": "",
+    "keywords": [
+      "філетування",
+      "філе",
+      "филе",
+      "перевішувач",
+      "перевішування",
+      "вілочкова",
+      "вилочкова",
+      "вілка",
+      "вилка",
+      "різка",
+      "різання",
+      "нарізка",
+      "стегно",
+      "стегна",
+      "бедро",
+      "бедра",
+      "підвісний",
+      "підвісна",
+      "конвеєр"
+    ]
   }
 }
