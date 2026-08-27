@@ -1,8 +1,14 @@
-from telegram import Update
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup
+)
+
 from telegram.ext import (
     Application,
     CommandHandler,
     MessageHandler,
+    CallbackQueryHandler,
     ContextTypes,
     filters
 )
@@ -11,7 +17,6 @@ import json
 import os
 
 TOKEN = os.getenv("BOT_TOKEN")
-
 ADMIN_ID = 687844961
 
 
@@ -25,9 +30,9 @@ def save_users(data):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def is_allowed(user_id):
-    users = load_users()
-    return user_id in users["users"]
+def load_manuals():
+    with open("manuals.json", "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def is_admin(user_id):
@@ -35,139 +40,41 @@ def is_admin(user_id):
     return user_id in users["admins"]
 
 
+def is_allowed(user_id):
+    users = load_users()
+    return user_id in users["users"]
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    if not is_allowed(update.effective_user.id):
+    user_id = update.effective_user.id
+
+    if is_allowed(user_id):
+
         await update.message.reply_text(
-            "⛔ У вас немає доступу до бота."
+            "🤖 База мануалів\n\n"
+            "/list - список мануалів\n"
+            "/admin - панель адміністратора"
         )
+
         return
 
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "🔔 Запросити доступ",
+                callback_data=f"request_{user_id}"
+            )
+        ]
+    ])
+
     await update.message.reply_text(
-        "🤖 База мануалів\n\n"
-        "/list - список мануалів\n"
-        "/users - список користувачів"
+        f"⛔ Доступ відсутній.\n\n"
+        f"Ваш ID: {user_id}",
+        reply_markup=keyboard
     )
 
 
-async def add_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    if not is_admin(update.effective_user.id):
-        await update.message.reply_text(
-            "⛔ Тільки адміністратор."
-        )
-        return
-
-    try:
-
-        new_user = int(context.args[0])
-
-        users = load_users()
-
-        if new_user not in users["users"]:
-            users["users"].append(new_user)
-
-        save_users(users)
-
-        await update.message.reply_text(
-            f"✅ Користувач {new_user} доданий."
-        )
-
-    except:
-        await update.message.reply_text(
-            "Використання:\n/adduser 123456789"
-        )
-
-
-async def remove_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if not is_admin(update.effective_user.id):
-        await update.message.reply_text(
-            "⛔ Тільки адміністратор."
-        )
-        return
-
-    try:
-
-        user_id = int(context.args[0])
-
-        users = load_users()
-
-        if user_id in users["users"]:
-            users["users"].remove(user_id)
-
-        save_users(users)
-
-        await update.message.reply_text(
-            f"✅ Користувач {user_id} видалений."
-        )
-
-    except:
-        await update.message.reply_text(
-            "Використання:\n/removeuser 123456789"
-        )
-
-
-async def list_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if not is_admin(update.effective_user.id):
-        return
-
-    users = load_users()
-
-    text = "👥 Користувачі:\n\n"
-
-    for user in users["users"]:
-        text += f"{user}\n"
-
-    await update.message.reply_text(text)
-
-
-async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if not is_allowed(update.effective_user.id):
-        return
-
-    with open("manuals.json", "r", encoding="utf-8") as f:
-        manuals = json.load(f)
-
-    text = "📚 Список мануалів:\n\n"
-
-    for item in manuals.values():
-        text += f"• {item['name']}\n"
-
-    await update.message.reply_text(text)
-
-
-async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if not is_allowed(update.effective_user.id):
-
-        await update.message.reply_text(
-            "⛔ Доступ заборонений."
-        )
-        return
-
-    query = update.message.text.lower().strip()
-
-    with open("manuals.json", "r", encoding="utf-8") as f:
-        manuals = json.load(f)
-
-    results = []
-
-    for item in manuals.values():
-
-        name = item.get("name", "").lower()
-
-        if query in name:
-            results.append(item)
-            continue
-
-        for keyword in item.get("keywords", []):
-
-            keyword = keyword.lower()
-
-            if (
-                query == keyword
-                or query in keyword
-                or keyword
+    if not is_admin(update.effective_user
