@@ -11,17 +11,17 @@ from pypdf import PdfReader
 import os
 
 TOKEN = os.getenv("BOT_TOKEN")
-
 MANUALS_DIR = "manuals"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "Привіт! Надішли PDF або введи текст для пошуку."
+        "Привіт! Надішли PDF або текст для пошуку."
     )
 
 
 async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     os.makedirs(MANUALS_DIR, exist_ok=True)
 
     files = os.listdir(MANUALS_DIR)
@@ -46,9 +46,12 @@ async def pdf_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     file = await document.get_file()
 
-    path = os.path.join(MANUALS_DIR, document.file_name)
+    filepath = os.path.join(
+        MANUALS_DIR,
+        document.file_name
+    )
 
-    await file.download_to_drive(path)
+    await file.download_to_drive(filepath)
 
     await update.message.reply_text(
         f"✅ Мануал {document.file_name} збережено"
@@ -60,7 +63,9 @@ async def search_pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.message.text.lower()
 
     if not os.path.exists(MANUALS_DIR):
-        await update.message.reply_text("Мануалів поки немає.")
+        await update.message.reply_text(
+            "Мануалів поки немає."
+        )
         return
 
     for filename in os.listdir(MANUALS_DIR):
@@ -68,7 +73,10 @@ async def search_pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not filename.lower().endswith(".pdf"):
             continue
 
-        filepath = os.path.join(MANUALS_DIR, filename)
+        filepath = os.path.join(
+            MANUALS_DIR,
+            filename
+        )
 
         try:
 
@@ -83,31 +91,42 @@ async def search_pdf(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 if query in text.lower():
 
-                    fragment = text[:1500]
-
-                    answer = (
-                        f"📄 Файл: {filename}\n"
-                        f"📑 Сторінка: {page_num + 1}\n\n"
-                        f"{fragment}"
+                    await update.message.reply_text(
+                        f"✅ Знайдено\n\n"
+                        f"Файл: {filename}\n"
+                        f"Сторінка: {page_num + 1}"
                     )
 
-                    await update.message.reply_text(answer[:4000])
+                    with open(filepath, "rb") as pdf_file:
+                        await update.message.reply_document(
+                            document=pdf_file
+                        )
 
                     return
 
         except Exception as e:
-            print(f"Помилка читання {filename}: {e}")
+            print(e)
 
-    await update.message.reply_text("❌ Нічого не знайдено.")
+    await update.message.reply_text(
+        "❌ Нічого не знайдено."
+    )
 
 
 app = Application.builder().token(TOKEN).build()
 
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("list", list_manuals))
+app.add_handler(
+    CommandHandler("start", start)
+)
 
 app.add_handler(
-    MessageHandler(filters.Document.PDF, pdf_handler)
+    CommandHandler("list", list_manuals)
+)
+
+app.add_handler(
+    MessageHandler(
+        filters.Document.PDF,
+        pdf_handler
+    )
 )
 
 app.add_handler(
@@ -117,6 +136,6 @@ app.add_handler(
     )
 )
 
-print("Bot started...")
+print("Bot started")
 
 app.run_polling()
