@@ -1,356 +1,473 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+2
 from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    CallbackQueryHandler,
-    ContextTypes,
-    filters
+3
+Application,
+4
+CommandHandler,
+5
+MessageHandler,
+6
+CallbackQueryHandler,
+7
+ContextTypes,
+8
+filters
+9
 )
-
+10
+ 
+11
 import json
+12
 import os
-
+13
+ 
+14
 TOKEN = os.getenv("BOT_TOKEN")
+15
 ADMIN_ID = 687844961
-
-
+16
+ 
+17
+ 
+18
 def load_users():
-    with open("users.json", "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
+19
+with open("users.json", "r", encoding="utf-8") as f:
+20
+return json.load(f)
+21
+ 
+22
+ 
+23
 def save_users(data):
-    with open("users.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
+24
+with open("users.json", "w", encoding="utf-8") as f:
+25
+json.dump(data, f, ensure_ascii=False, indent=2)
+26
+ 
+27
+ 
+28
 def load_manuals():
-    with open("manuals.json", "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
+29
+with open("manuals.json", "r", encoding="utf-8") as f:
+30
+return json.load(f)
+31
+ 
+32
+ 
+33
 def is_allowed(user_id):
-    users = load_users()
-    return user_id in users["users"]
-
-
+34
+users = load_users()
+35
+return user_id in users["users"]
+36
+ 
+37
+ 
+38
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    user_id = update.effective_user.id
-
-    if not is_allowed(user_id):
-        await update.message.reply_text(
-            f"⛔ У вас немає доступу.\n\n"
-            f"Ваш ID:\n{user_id}\n\n"
-            f"Надішліть цей ID адміністратору."
-        )
-        return
-
-    keyboard = [
-        [
-            InlineKeyboardButton("Mayekawa", callback_data="mayekawa"),
-            InlineKeyboardButton("JBT", callback_data="jbt")
-        ],
-        [
-            InlineKeyboardButton("FoodMate", callback_data="foodmate"),
-            InlineKeyboardButton("Baader", callback_data="baader")
-        ],
-        [
-            InlineKeyboardButton("Stork", callback_data="stork"),
-            InlineKeyboardButton("FHF", callback_data="fhf")
-        ],
-        [
-            InlineKeyboardButton("AMF", callback_data="amf"),
-            InlineKeyboardButton("Dimaq", callback_data="dimaq")
-        ],
-        [
-            InlineKeyboardButton("KFC", callback_data="kfc")
-        ],
-        [
-            InlineKeyboardButton(
-                "⚠️ Типові несправності",
-                callback_data="faults"
-            )
-        ]
-    ]
-
-    await update.message.reply_text(
-        "Оберіть розділ:",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
-
-async def allow_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if update.effective_user.id != ADMIN_ID:
-        await update.message.reply_text(
-            "⛔ Тільки адміністратор."
-        )
-        return
-
-    try:
-        new_user_id = int(context.args[0])
-
-        users = load_users()
-
-        if new_user_id not in users["users"]:
-            users["users"].append(new_user_id)
-
-        save_users(users)
-
-        await update.message.reply_text(
-            f"✅ Користувач {new_user_id} доданий."
-        )
-
-    except Exception:
-        await update.message.reply_text(
-            "Приклад:\n/allow 123456789"
-        )
-
-
-async def users_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if update.effective_user.id != ADMIN_ID:
-        return
-
-    users = load_users()
-
-    text = "👥 Користувачі:\n\n"
-
-    for user in users["users"]:
-        text += f"{user}\n"
-
-    await update.message.reply_text(text)
-
-
-async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if not is_allowed(update.effective_user.id):
-        return
-
-    manuals = load_manuals()
-
-    text = "📚 Список мануалів:\n\n"
-
-    for item in manuals.values():
-        text += f"• {item['name']}\n"
-
-    await update.message.reply_text(text)
-
-
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-143
+39
  
-144
-query = update.callback_query
-145
-await query.answer()
-146
+40
+user_id = update.effective_user.id
+41
  
-147
-if query.data == "faults":
-148
+42
+if not is_allowed(user_id):
+43
  
-149
-await query.message.reply_text(
-150
-"⚠️ Типові несправності\n\n"
-151
-"🔹 Не запускається\n"
-152
-"1. Перевірити аварійні кнопки\n"
-153
-"2. Перевірити автоматичні вимикачі\n"
-154
-"3. Перевірити живлення\n\n"
-155
-"🔹 Помилка датчика\n"
-156
-"1. Очистити датчик\n"
-157
-"2. Перевірити кабель\n"
-158
-"3. Перевірити кріплення\n\n"
-159
-"🔹 Помилка частотника\n"
-160
-"1. Записати код помилки\n"
-161
-"2. Перезапустити обладнання\n"
-162
-"3. Викликати електрика\n\n"
-163
-"🔹 Проблема філетування\n"
-164
-"1. Перевірити ножі\n"
-165
-"2. Перевірити напрямні\n"
-166
-"3. Перевірити налаштування\n\n"
-167
-"🔹 Заклинювання конвеєра\n"
-168
-"1. Зупинити обладнання\n"
-169
-"2. Перевірити ланцюг\n"
-170
-"3. Перевірити привід"
-171
+44
+await update.message.reply_text(
+45
+f"⛔ У вас немає доступу.\n\n"
+46
+f"Ваш ID:\n{user_id}\n\n"
+47
+f"Надішліть цей ID адміністратору."
+48
 )
-172
+49
 return
-173
+50
  
-174
-manuals = load_manuals()
-175
- 
-176
-if query.data in manuals:
-177
- 
-178
-item = manuals[query.data]
-179
- 
-180
-await query.message.reply_text(
-181
-f"✅ {item['name']}\n\n"
-182
-f"🔗 {item['url']}"
-183
+51
+keyboard = [
+52
+[
+53
+InlineKeyboardButton("Mayekawa", callback_data="mayekawa"),
+54
+InlineKeyboardButton("JBT", callback_data="jbt")
+55
+],
+56
+[
+57
+InlineKeyboardButton("FoodMate", callback_data="foodmate"),
+58
+InlineKeyboardButton("Baader", callback_data="baader")
+59
+],
+60
+[
+61
+InlineKeyboardButton("Stork", callback_data="stork"),
+62
+InlineKeyboardButton("FHF", callback_data="fhf")
+63
+],
+64
+[
+65
+InlineKeyboardButton("AMF", callback_data="amf"),
+66
+InlineKeyboardButton("Dimaq", callback_data="dimaq")
+67
+],
+68
+[
+69
+InlineKeyboardButton("KFC", callback_data="kfc")
+70
+],
+71
+[
+72
+InlineKeyboardButton(
+73
+"⚠️ Типові несправності",
+74
+callback_data="faults"
+75
 )
-184
+76
+]
+77
+]
+78
  
+79
+await update.message.reply_text(
+80
+"🔧 Оберіть розділ:",
+81
+reply_markup=InlineKeyboardMarkup(keyboard)
+82
+)
+83
+ 
+84
+ 
+85
+async def allow_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+86
+ 
+87
+if update.effective_user.id != ADMIN_ID:
+88
+ 
+89
+await update.message.reply_text(
+90
+"⛔ Тільки адміністратор."
+91
+)
+92
+return
+93
+ 
+94
+try:
+95
+ 
+96
+new_user_id = int(context.args[0])
+97
+ 
+98
+users = load_users()
+99
+ 
+100
+if new_user_id not in users["users"]:
+101
+users["users"].append(new_user_id)
+102
+ 
+103
+save_users(users)
+104
+ 
+105
+await update.message.reply_text(
+106
+f"✅ Користувач {new_user_id} доданий."
+107
+)
+108
+ 
+109
+except Exception:
+110
+ 
+111
+await update.message.reply_text(
+112
+"Приклад:\n/allow 123456789"
+113
+)
+114
+ 
+115
+ 
+116
+async def users_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
+117
+ 
+118
+if update.effective_user.id != ADMIN_ID:
+119
+return
+120
+ 
+121
+users = load_users()
+122
+ 
+123
+text = "👥 Користувачі:\n\n"
+124
+ 
+125
+for user in users["users"]:
+126
+text += f"{user}\n"
+127
+ 
+128
+await update.message.reply_text(text)
+129
+ 
+130
+ 
+131
+async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
+132
+ 
+133
+if not is_allowed(update.effective_user.id):
+134
+return
+135
+ 
+136
+manuals = load_manuals()
+137
+ 
+138
+text = "📚 Список мануалів:\n\n"
+139
+ 
+140
+for item in manuals.values():
+141
+text += f"• {item['name']}\n"
+142
+ 
+143
+await update.message.reply_text(text)
+144
+ 
+145
+ 
+146
+async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+147
+ 
+148
+query = update.callback_query
+149
+ 
+150
+await query.answer()
+151
+ 
+152
+if query.data == "faults":
+153
+ 
+154
+await query.message.reply_text(
+155
+"⚠️ Типові несправності\n\n"
+156
+"Розділ у наповненні.\n\n"
+157
+"Сюди можна буде додати окремі мануали та інструкції."
+158
+)
+159
+return
+160
+ 
+161
+manuals = load_manuals()
+162
+ 
+163
+if query.data in manuals:
+164
+ 
+165
+item = manuals[query.data]
+166
+ 
+167
+await query.message.reply_text(
+168
+f"✅ {item['name']}\n\n"
+169
+f"🔗 {item['url']}"
+170
+)
+171
+ 
+172
+ 
+173
+async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
+174
+ 
+175
+if not is_allowed(update.effective_user.id):
+176
+ 
+177
+await update.message.reply_text(
+178
+"⛔ Доступ заборонений."
+179
+)
+180
+return
+181
+ 
+182
+query = update.message.text.lower().strip()
+183
+ 
+184
+manuals = load_manuals()
 185
  
 186
-async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
+for item in manuals.values():
 187
  
 188
-if not is_allowed(update.effective_user.id):
+if query in item["name"].lower():
 189
  
 190
 await update.message.reply_text(
 191
-"⛔ Доступ заборонений."
+f"✅ {item['name']}\n\n"
 192
-)
+f"🔗 {item['url']}"
 193
-return
+)
 194
- 
+return
 195
-query = update.message.text.lower().strip()
+ 
 196
- 
-197
-manuals = load_manuals()
-198
- 
-199
-for item in manuals.values():
-200
- 
-201
-if query in item["name"].lower():
-202
- 
-203
-await update.message.reply_text(
-204
-f"✅ {item['name']}\n\n"
-205
-f"🔗 {item['url']}"
-206
-)
-207
-return
-208
- 
-209
 for keyword in item.get("keywords", []):
-210
+197
  
-211
+198
 keyword = keyword.lower()
-212
+199
  
-213
+200
 if (
-214
+201
 query == keyword
-215
+202
 or query in keyword
-216
+203
 or keyword in query
-217
+204
 ):
-218
+205
+ 
+206
 await update.message.reply_text(
-219
+207
 f"✅ {item['name']}\n\n"
-220
+208
 f"🔗 {item['url']}"
-221
+209
 )
-222
+210
 return
+211
+ 
+212
+await update.message.reply_text(
+213
+"❌ Нічого не знайдено."
+214
+)
+215
+ 
+216
+ 
+217
+app = Application.builder().token(TOKEN).build()
+218
+ 
+219
+app.add_handler(CommandHandler("start", start))
+220
+app.add_handler(CommandHandler("list", list_manuals))
+221
+app.add_handler(CommandHandler("allow", allow_user))
+222
+app.add_handler(CommandHandler("users", users_list))
 223
  
 224
-await update.message.reply_text(
+app.add_handler(
 225
-"❌ Нічого не знайдено."
+CallbackQueryHandler(button_handler)
 226
 )
 227
  
 228
- 
+app.add_handler(
 229
-app = Application.builder().token(TOKEN).build()
-230
- 
-231
-app.add_handler(CommandHandler("start", start))
-232
-app.add_handler(CommandHandler("list", list_manuals))
-233
-app.add_handler(CommandHandler("allow", allow_user))
-234
-app.add_handler(CommandHandler("users", users_list))
-235
- 
-236
-app.add_handler(
-237
-CallbackQueryHandler(button_handler)
-238
-)
-239
- 
-240
-app.add_handler(
-241
 MessageHandler(
-242
+230
 filters.TEXT & ~filters.COMMAND,
-243
+231
 search_manual
-244
+232
 )
-245
+233
 )
-246
+234
  
-247
+235
 print("Bot started")
-248
+236
  
-249
+237
 app.run_polling()
