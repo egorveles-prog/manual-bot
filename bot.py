@@ -45,8 +45,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_allowed(user_id):
 
         await update.message.reply_text(
-            f"Access denied\n\nYour ID:\n{user_id}"
+            f"Доступ заборонено\n\nВаш ID:\n{user_id}"
         )
+
         return
 
     keyboard = [
@@ -98,14 +99,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton(
-                "Faults",
+                "Типові несправності",
                 callback_data="faults"
             )
         ]
     ]
 
     await update.message.reply_text(
-        "Select section:",
+        "Оберіть розділ:",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -130,7 +131,7 @@ async def allow_user(
         save_users(users)
 
         await update.message.reply_text(
-            f"User {new_user_id} added"
+            f"Користувач {new_user_id} доданий"
         )
 
     except Exception:
@@ -150,7 +151,7 @@ async def users_list(
 
     users = load_users()
 
-    text = "Users:\n\n"
+    text = "Користувачі:\n\n"
 
     for user in users["users"]:
         text += f"{user}\n"
@@ -165,7 +166,7 @@ async def list_manuals(
 
     manuals = load_manuals()
 
-    text = "Manuals:\n\n"
+    text = "Мануали:\n\n"
 
     for item in manuals.values():
         text += f"{item['name']}\n"
@@ -185,7 +186,8 @@ async def button_handler(
     if query.data == "faults":
 
         await query.message.reply_text(
-            "Fault section is empty"
+            "Типові несправності\n\n"
+            "Розділ у наповненні."
         )
 
         return
@@ -240,7 +242,7 @@ async def search_manual(
                 return
 
     await update.message.reply_text(
-        "Nothing found"
+        "Нічого не знайдено"
     )
 
 
