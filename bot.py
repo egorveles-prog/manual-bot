@@ -1,8 +1,6 @@
-from telegram import (
-    Update,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup
-)
+from telegram import Update
+from telegram import InlineKeyboardButton
+from telegram import InlineKeyboardMarkup
 
 from telegram.ext import (
     Application,
@@ -17,7 +15,6 @@ import json
 import os
 
 TOKEN = os.getenv("BOT_TOKEN")
-
 ADMIN_ID = 687844961
 
 
@@ -29,6 +26,11 @@ def load_users():
 def save_users(data):
     with open("users.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def load_manuals():
+    with open("manuals.json", "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def is_allowed(user_id):
@@ -102,4 +104,66 @@ async def allow_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def users_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    if update.effective
+    if update.effective_user.id != ADMIN_ID:
+        return
+
+    users = load_users()
+
+    text = "👥 Користувачі:\n\n"
+
+    for user in users["users"]:
+        text += f"{user}\n"
+
+    await update.message.reply_text(text)
+
+
+async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    if not is_allowed(update.effective_user.id):
+        return
+
+    manuals = load_manuals()
+
+    text = "📚 Список мануалів:\n\n"
+
+    for item in manuals.values():
+        text += f"• {item['name']}\n"
+
+    await update.message.reply_text(text)
+
+
+async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    query = update.callback_query
+
+    await query.answer()
+
+    if query.data == "manufacturers":
+
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    "Mayekawa",
+                    callback_data="mayekawa"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    "KFC",
+                    callback_data="kfc"
+                )
+            ]
+        ]
+
+        await query.message.reply_text(
+            "🔧 Оберіть виробника:",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+        return
+
+    if query.data == "all_manuals":
+
+        manuals = load_manuals()
+
+        text = "📚 Список мануал
