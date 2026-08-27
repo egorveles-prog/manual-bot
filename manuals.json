@@ -23,7 +23,6 @@
       "стегна"
     ]
   },
-
   "kfc": {
     "name": "KFC 9 Piece Spec.pdf",
     "url": "https://drive.google.com/file/d/1qNkjQjTCoLhX-pNZz-N94tFbT0pJ_jGi/view?usp=drive_link",
@@ -33,71 +32,6 @@
       "кей еф сі",
       "кфс",
       "кейфсі"
-    ]
-  },
-
-  "baader": {
-    "name": "BAADER",
-    "url": "",
-    "keywords": [
-      "baader",
-      "баадер",
-      "бадер",
-      "філетування",
-      "філе"
-    ]
-  },
-
-  "foodmate": {
-    "name": "FoodMate",
-    "url": "",
-    "keywords": [
-      "foodmate",
-      "фудмейт",
-      "фудмате",
-      "фуд мейт"
-    ]
-  },
-
-  "marel": {
-    "name": "Marel",
-    "url": "",
-    "keywords": [
-      "marel",
-      "марел",
-      "марель",
-      "морел"
-    ]
-  },
-
-  "stork": {
-    "name": "Stork",
-    "url": "",
-    "keywords": [
-      "stork",
-      "сторк",
-      "шторк"
-    ]
-  },
-
-  "jbt": {
-    "name": "JBT",
-    "url": "",
-    "keywords": [
-      "jbt",
-      "джейбіті",
-      "джей би ти",
-      "джбт"
-    ]
-  },
-
-  "dimaq": {
-    "name": "Dimaq",
-    "url": "",
-    "keywords": [
-      "dimaq",
-      "дімак",
-      "димак"
     ]
   }
 }
