@@ -23,6 +23,7 @@
       "стегна"
     ]
   },
+
   "kfc": {
     "name": "KFC 9 Piece Spec.pdf",
     "url": "https://drive.google.com/file/d/1qNkjQjTCoLhX-pNZz-N94tFbT0pJ_jGi/view?usp=drive_link",
@@ -32,6 +33,19 @@
       "кей еф сі",
       "кфс",
       "кейфсі"
+    ]
+  },
+
+  "fhf": {
+    "name": "FHF - Типові несправності",
+    "url": "https://drive.google.com/file/d/17ixSkXsjeFzn8y0jQ10fnD3A8LPlUm8O/view?usp=sharing",
+    "keywords": [
+      "fhf",
+      "ФХФ",
+      "фхф",
+      "фіечфі",
+      "типові несправності",
+      "несправності"
     ]
   }
 }
