@@ -59,67 +59,12 @@ async def allow_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     try:
-
         new_user_id = int(context.args[0])
 
         users = load_users()
 
         if new_user_id not in users["users"]:
             users["users"].append(new_user_id)
+            save_users(users)
 
-        save_users(users)
-
-        await update.message.reply_text(
-            f"✅ Користувач {new_user_id} доданий."
-        )
-
-    except:
-
-        await update.message.reply_text(
-            "Використання:\n/allow 123456789"
-        )
-
-
-async def users_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if update.effective_user.id != ADMIN_ID:
-        return
-
-    users = load_users()
-
-    text = "👥 Користувачі:\n\n"
-
-    for user in users["users"]:
-        text += f"{user}\n"
-
-    await update.message.reply_text(text)
-
-
-async def list_manuals(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if not is_allowed(update.effective_user.id):
-        return
-
-    with open("manuals.json", "r", encoding="utf-8") as f:
-        manuals = json.load(f)
-
-    text = "📚 Список мануалів:\n\n"
-
-    for item in manuals.values():
-        text += f"• {item['name']}\n"
-
-    await update.message.reply_text(text)
-
-
-async def search_manual(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    if not is_allowed(update.effective_user.id):
-
-        await update.message.reply_text(
-            "⛔ Доступ заборонений."
-        )
-        return
-
-    query = update.message.text.lower().strip()
-
-    with open("
+        await update.message.reply
